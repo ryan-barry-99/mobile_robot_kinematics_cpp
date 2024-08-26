@@ -48,7 +48,9 @@ public:
      *
      * @param wheels A vector of Wheel objects representing the initial set of wheels for the robot.
      */
-    MobileRobot(std::vector<Wheel> wheels);
+    MobileRobot(std::vector<Wheel> wheels) : 
+        m_wheels(wheels), 
+        kinematics(MobileRobotKinematics(&m_wheels)) {}
 
     /**
      * @brief Adds a new wheel to the robot and updates the kinematics.
@@ -59,7 +61,10 @@ public:
      *
      * @param wheel A Wheel object representing the new wheel to be added.
      */
-    void addWheel(Wheel wheel);
+    void addWheel(Wheel wheel){
+        m_wheels.push_back(wheel);
+        kinematics.updateWheels(&m_wheels);
+    }
 
     /**
      * @brief Removes a wheel from the robot by name and updates the kinematics.
@@ -71,7 +76,15 @@ public:
      *
      * @param name A string representing the name of the wheel to be removed.
      */
-    void removeWheel(std::string name);
+    void removeWheel(std::string name){
+        for (int i = 0; i < m_wheels.size(); i++){
+            if (m_wheels[i].getName() == name){
+                m_wheels.erase(m_wheels.begin() + i);
+                kinematics.updateWheels(&m_wheels);
+                break;
+            }
+        }
+    }
 
 
     /**

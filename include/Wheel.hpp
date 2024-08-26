@@ -30,21 +30,31 @@ using namespace std;
 class Wheel {
 public:
     // Constructor
-    Wheel(string name, double radius, double L, double alpha, double beta, double gamma);
+    Wheel(string name, double radius, double L, double alpha, double beta, double gamma) :
+        m_name(name), 
+        m_radius(radius), 
+        m_L(L), 
+        m_alpha(alpha), 
+        m_beta(beta), 
+        m_gamma(gamma), 
+        m_currentVelocity(0), 
+        m_targetVelocity(0)
+    {
+        // Empty Constructor
+    }
 
-    // Setter Functions
 
     /**
      * @brief Sets the target velocity for the wheel.
      * @param velocity The target velocity to be set.
      */
-    void setTargetVelocity(double velocity);
+    void setTargetVelocity(double velocity) { m_targetVelocity = velocity; }
 
     /**
      * @brief Sets the current velocity for the wheel.
      * @param velocity The current velocity to be set.
      */
-    void setCurrentVelocity(double velocity);
+    void setCurrentVelocity(double velocity) { m_currentVelocity = velocity; }
 
 
     // Getter Functions
@@ -53,49 +63,49 @@ public:
      * @brief Returns the target velocity of the wheel.
      * @return double The current target velocity.
      */
-    double getTargetVelocity() const;
+    double getTargetVelocity() const { return m_targetVelocity; }
 
     /**
      * @brief Returns the current velocity of the wheel.
      * @return double The current velocity.
      */
-    double getCurrentVelocity() const;
+    double getCurrentVelocity() const { return m_currentVelocity; }
 
     /**
      * @brief Returns the name of the wheel.
      * @return std::string The name of the wheel.
      */
-    std::string getName() const;
+    std::string getName() const { return m_name; }
 
     /**
      * @brief Returns the radius of the wheel.
      * @return double The radius of the wheel.
      */
-    double getRadius() const;
+    double getRadius() const { return m_radius; }
 
     /**
      * @brief Returns the length L associated with the wheel.
      * @return double The length L of the wheel.
      */
-    double getL() const;
+    double getL() const { return m_L; }
 
     /**
      * @brief Returns the alpha angle of the wheel.
      * @return double The alpha angle.
      */
-    double getAlpha() const;
+    double getAlpha() const { return m_alpha; }
 
     /**
      * @brief Returns the beta angle of the wheel.
      * @return double The beta angle.
      */
-    double getBeta() const;
+    double getBeta() const { return m_beta; }
 
     /**
      * @brief Returns the gamma angle of the wheel.
      * @return double The gamma angle.
      */
-    double getGamma() const;
+    double getGamma() const { return m_gamma; }
 
 
     // Kinematic Functions
@@ -111,7 +121,13 @@ public:
      * 
      * @return Eigen::MatrixXd The computed Jacobian matrix for the wheel.
      */
-    Eigen::MatrixXd calcJ1();
+    Eigen::MatrixXd calcJ1(){
+        m_J1 << sin(m_alpha + m_beta + m_gamma), 
+                -cos(m_alpha + m_beta + m_gamma), 
+                -m_L*cos(m_beta + m_gamma);
+
+        return m_J1;
+    }
 
     /**
      * @brief Calculates the Coriolis matrix (C1) for the wheel.
@@ -123,7 +139,14 @@ public:
      * 
      * @return Eigen::MatrixXd The computed Coriolis matrix for the wheel.
      */
-    Eigen::MatrixXd calcC1();
+    Eigen::MatrixXd calcC1(){
+        m_C1 << cos(m_alpha + m_beta + m_gamma), 
+                sin(m_alpha + m_beta + m_gamma), 
+                m_L*m_currentVelocity*sin(m_beta + m_gamma);
+
+        return m_C1;
+    }
+
 
 
 private:

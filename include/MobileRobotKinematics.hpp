@@ -40,7 +40,10 @@ public:
      *
      * @param wheels Pointer to a vector of Wheel objects representing the robot's wheels.
      */
-    MobileRobotKinematics(std::vector<Wheel>* wheels);
+    MobileRobotKinematics(std::vector<Wheel>* wheels) : m_theta(0)
+    {
+        this->updateWheels(wheels);
+    }
 
     /**
      * @brief Updates the internal state of the kinematics object with a new set of wheels.
@@ -51,7 +54,17 @@ public:
      *
      * @param wheels Pointer to a vector of Wheel objects representing the new set of wheels.
      */
-    void updateWheels(std::vector<Wheel>* wheels);
+    void updateWheels(std::vector<Wheel>* wheels){
+        m_wheels = wheels;
+        m_numWheels = wheels->size();
+        m_rTheta = Eigen::MatrixXd::Identity(m_numWheels, m_numWheels);
+        m_J1 = Eigen::MatrixXd::Zero(3, m_numWheels);
+        m_C1 = Eigen::MatrixXd::Zero(3, m_numWheels);
+        m_J2 = Eigen::MatrixXd::Zero(m_numWheels, m_numWheels);
+        m_zetaDot = Eigen::MatrixXd::Zero(3, 1);
+        m_phiDot = Eigen::MatrixXd::Zero(m_numWheels, 1);
+        this->computeMatrices();
+    }
 
     /**
      * @brief Updates the rotation matrix based on the given angle.
@@ -69,7 +82,14 @@ public:
      *
      * @note This function assumes that the rotation is only in the XY plane, and the Z axis remains unchanged.
      */
-    void updateRotation(double theta);
+    void updateRotation(double theta){
+        m_theta = theta;
+        double cTheta = cos(m_theta);
+        double sTheta = sin(m_theta);
+        m_rTheta << cTheta, -sTheta, 0,
+                    sTheta, cTheta, 0,
+                    0, 0, 1;
+    }
 
     /**
      * @brief Computes the forward kinematics of the mobile robot.
@@ -89,7 +109,11 @@ public:
      *         - The second element represents the linear velocity in the y direction (y_dot).
      *         - The third element represents the angular velocity about the z axis (phi_dot).
      */
-    Eigen::Matrix3d forwardKinematics(Eigen::MatrixXd phiDot);
+    Eigen::Matrix3d forwardKinematics(Eigen::MatrixXd phiDot){
+        m_phiDot = phiDot;
+        m_zetaDot = m_rTheta.inverse() * m_J1 * m_phiDot;
+        return m_zetaDot;
+    }
 
     /**
      * @brief Computes the inverse kinematics of the mobile robot.
@@ -108,7 +132,11 @@ public:
      * @return An Eigen::MatrixXd object representing the computed angular velocities for the wheels.
      *         The matrix is of size (numWheels, 1), where each element corresponds to the angular velocity of a wheel.
      */
-    Eigen::MatrixXd inverseKinematics(Eigen::MatrixXd zetaDot);
+    Eigen::MatrixXd inverseKinematics(Eigen::MatrixXd zetaDot){
+        m_zetaDot = zetaDot;
+        m_phiDot = m_J2.inverse() * m_J1 * m_rTheta * m_zetaDot;
+        return m_phiDot;
+    }
 
 
 private:
@@ -122,7 +150,15 @@ private:
      * 
      * The computed matrices are stored as member variables for use in kinematic calculations.
      */
-    void computeMatrices();
+    void computeMatrices(){
+        for (int i = 0; i < m_numWheels; i++){
+            Wheel* p_wheel = &((*m_wheels)[i]);
+            m_J1.col(i) = p_wheel->calcJ1();
+            m_C1.col(i) = p_wheel->calcC1();
+            m_J2(i, i) = p_wheel->getRadius();
+        }
+    }
+
     vector<Wheel>* m_wheels; ///< Vector of Wheel pointer objects representing the robot's wheels
     int m_numWheels;        ///< Number of wheels in the robot's kinematic system
     int m_theta;            ///< Angle of the robot's orientation

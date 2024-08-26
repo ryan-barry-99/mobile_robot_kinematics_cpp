@@ -12,9 +12,6 @@ include_directories(/opt/homebrew/include/eigen3)
 # Add the source files
 add_executable(mobile_robot_kinematics
     src/main.cpp
-    src/MobileRobotKinematics.cpp
-    src/Wheel.cpp
-    src/MobileRobot.cpp
 )
 
 # Include directories for your own headers
