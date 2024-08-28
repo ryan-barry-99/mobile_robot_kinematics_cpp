@@ -26,9 +26,6 @@
 #include <vector>
 #include <Eigen/Dense>
 #include "Wheel.hpp"
-#include <iostream>
-
-using namespace std;
 
 
 class MobileRobotKinematics {
@@ -112,7 +109,6 @@ public:
     Eigen::MatrixXd forwardKinematics(Eigen::MatrixXd phiDot){
         m_phiDot = phiDot;
         m_zetaDot =  m_rTheta.inverse() * m_J1 * m_J2 * phiDot;
-        std::cout << "m_zetaDot: " << m_zetaDot << std::endl;
         return m_zetaDot;
     }
 

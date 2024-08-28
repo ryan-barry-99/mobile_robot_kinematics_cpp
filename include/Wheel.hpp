@@ -25,12 +25,11 @@
 #include <string>
 #include <Eigen/Dense>
 
-using namespace std;
 
 class Wheel {
 public:
     // Constructor
-    Wheel(string name, double radius, double L, double alpha, double beta, double gamma) :
+    Wheel(std::string name, double radius, double L, double alpha, double beta, double gamma) :
         m_name(name), 
         m_radius(radius), 
         m_L(L), 
@@ -152,7 +151,7 @@ public:
 
 
 private:
-    string m_name;           ///< Name of the wheel
+    std::string m_name;           ///< Name of the wheel
     double m_radius;         ///< Radius of the wheel in meters
     double m_L;              ///< The distance from the center of the robot to the center of the wheel in meters.
     double m_alpha;          ///< The angle offset from the robot's x-axis

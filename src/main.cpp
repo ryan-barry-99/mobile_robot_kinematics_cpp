@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector> // Include this for std::vector
 #include <cmath> // Include this for M_PI
 #include <Eigen/Dense> // Include this for Eigen library
