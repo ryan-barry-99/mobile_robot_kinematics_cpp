@@ -125,7 +125,7 @@ public:
     Eigen::MatrixXd calcJ1(){
         m_J1 << sin(m_alpha + m_beta + m_gamma), 
                 -cos(m_alpha + m_beta + m_gamma), 
-                -m_L/m_radius*cos(m_beta + m_gamma);
+                -m_L*cos(m_beta + m_gamma);
 
         return m_J1;
     }
@@ -143,7 +143,7 @@ public:
     Eigen::MatrixXd calcC1(){
         m_C1 << cos(m_alpha + m_beta + m_gamma), 
                 sin(m_alpha + m_beta + m_gamma), 
-                m_L*m_currentVelocity*sin(m_beta + m_gamma);
+                m_L/m_radius*m_currentVelocity*sin(m_beta + m_gamma);
 
         return m_C1;
     }
