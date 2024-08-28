@@ -38,7 +38,9 @@ public:
         m_beta(beta), 
         m_gamma(gamma), 
         m_currentVelocity(0), 
-        m_targetVelocity(0)
+        m_targetVelocity(0),
+        m_J1(3,1),    // Initialize m_J1 as a 3x1 matrix
+        m_C1(3,1)     // Initialize m_C1 as a 3x1 matrix
     {
         // Empty Constructor
     }
@@ -124,7 +126,7 @@ public:
     Eigen::MatrixXd calcJ1(){
         m_J1 << sin(m_alpha + m_beta + m_gamma), 
                 -cos(m_alpha + m_beta + m_gamma), 
-                -m_L*cos(m_beta + m_gamma);
+                -m_L/m_radius*cos(m_beta + m_gamma);
 
         return m_J1;
     }

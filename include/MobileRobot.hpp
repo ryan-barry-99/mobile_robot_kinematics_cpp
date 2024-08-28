@@ -27,6 +27,7 @@
 #include "Wheel.hpp"
 #include <vector>
 #include <string>
+#include <iostream>
 
 
 /**
@@ -48,9 +49,7 @@ public:
      *
      * @param wheels A vector of Wheel objects representing the initial set of wheels for the robot.
      */
-    MobileRobot(std::vector<Wheel> wheels) : 
-        m_wheels(wheels), 
-        kinematics(MobileRobotKinematics(&m_wheels)) {}
+    MobileRobot() : kinematics(MobileRobotKinematics(&m_wheels)) {}
 
     /**
      * @brief Adds a new wheel to the robot and updates the kinematics.
@@ -63,7 +62,7 @@ public:
      */
     void addWheel(Wheel wheel){
         m_wheels.push_back(wheel);
-        kinematics.updateWheels(&m_wheels);
+        kinematics.updateWheels();
     }
 
     /**
@@ -80,7 +79,7 @@ public:
         for (int i = 0; i < m_wheels.size(); i++){
             if (m_wheels[i].getName() == name){
                 m_wheels.erase(m_wheels.begin() + i);
-                kinematics.updateWheels(&m_wheels);
+                kinematics.updateWheels();
                 break;
             }
         }

@@ -26,6 +26,7 @@
 #include <vector>
 #include <Eigen/Dense>
 #include "Wheel.hpp"
+#include <iostream>
 
 using namespace std;
 
@@ -40,9 +41,9 @@ public:
      *
      * @param wheels Pointer to a vector of Wheel objects representing the robot's wheels.
      */
-    MobileRobotKinematics(std::vector<Wheel>* wheels) : m_theta(0)
-    {
-        this->updateWheels(wheels);
+    MobileRobotKinematics(std::vector<Wheel>* wheels) : m_theta(0), m_wheels(wheels)
+    {            
+        this->updateWheels();
     }
 
     /**
@@ -54,14 +55,13 @@ public:
      *
      * @param wheels Pointer to a vector of Wheel objects representing the new set of wheels.
      */
-    void updateWheels(std::vector<Wheel>* wheels){
-        m_wheels = wheels;
-        m_numWheels = wheels->size();
-        m_rTheta = Eigen::MatrixXd::Identity(m_numWheels, m_numWheels);
+    void updateWheels(){
+        m_numWheels = m_wheels->size();
+        m_rTheta = Eigen::MatrixXd::Identity(3,3);
         m_J1 = Eigen::MatrixXd::Zero(3, m_numWheels);
         m_C1 = Eigen::MatrixXd::Zero(3, m_numWheels);
-        m_J2 = Eigen::MatrixXd::Zero(m_numWheels, m_numWheels);
-        m_zetaDot = Eigen::MatrixXd::Zero(3, 1);
+        m_J2 = Eigen::MatrixXd::Identity(m_numWheels, m_numWheels);
+        m_zetaDot = Eigen::MatrixXd::Zero(3,1);
         m_phiDot = Eigen::MatrixXd::Zero(m_numWheels, 1);
         this->computeMatrices();
     }
@@ -109,9 +109,10 @@ public:
      *         - The second element represents the linear velocity in the y direction (y_dot).
      *         - The third element represents the angular velocity about the z axis (phi_dot).
      */
-    Eigen::Matrix3d forwardKinematics(Eigen::MatrixXd phiDot){
+    Eigen::MatrixXd forwardKinematics(Eigen::MatrixXd phiDot){
         m_phiDot = phiDot;
-        m_zetaDot = m_rTheta.inverse() * m_J1 * m_phiDot;
+        m_zetaDot =  m_rTheta.inverse() * m_J1 * m_J2 * phiDot;
+        std::cout << "m_zetaDot: " << m_zetaDot << std::endl;
         return m_zetaDot;
     }
 
@@ -134,7 +135,7 @@ public:
      */
     Eigen::MatrixXd inverseKinematics(Eigen::MatrixXd zetaDot){
         m_zetaDot = zetaDot;
-        m_phiDot = m_J2.inverse() * m_J1 * m_rTheta * m_zetaDot;
+        m_phiDot = (m_J1 * m_J2).completeOrthogonalDecomposition().pseudoInverse() * (m_rTheta * m_zetaDot);
         return m_phiDot;
     }
 
@@ -159,7 +160,7 @@ private:
         }
     }
 
-    vector<Wheel>* m_wheels; ///< Vector of Wheel pointer objects representing the robot's wheels
+    std::vector<Wheel>* m_wheels; ///< Pointer to a vector of Wheel objects representing the robot's wheels
     int m_numWheels;        ///< Number of wheels in the robot's kinematic system
     int m_theta;            ///< Angle of the robot's orientation
     Eigen::MatrixXd m_rTheta; ///< Rotation matrix for the robot's orientation
